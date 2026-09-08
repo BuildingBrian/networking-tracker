@@ -1,7 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // Keeps the dev-mode overlay badge out of the README screenshots captured by
+  // scripts/screenshots.mjs. Has no effect on production builds.
+  devIndicators: false,
 };
 
 export default nextConfig;

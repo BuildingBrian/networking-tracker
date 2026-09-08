@@ -26,8 +26,25 @@ A private, per-user networking tracker for the people you want to stay connected
 
 ## Screenshots
 
+Regenerate these at any time against a running instance:
+
+```bash
+npm run screenshots                        # against http://localhost:3000
+BASE_URL=https://your-app.vercel.app npm run screenshots
+```
+
+`scripts/screenshots.mjs` drives the local Google Chrome with Playwright, creates a throwaway account, and walks the whole lifecycle — sign-up, empty state, adding contacts, an invalid submission, filtering, editing, a page refresh, and the mobile layout.
+
+### Sign in
+
+![Sign-in screen](docs/01-sign-in.png)
+
+### Sign up
+
+![Sign-up screen with details filled in](docs/02-sign-up-filled.png)
+
 <!-- SCREENSHOTS -->
-_Pending — added once the app is deployed._
+_The remaining screenshots — contact list, invalid input rejected, filtering, editing, persistence after refresh, and the mobile layout — are captured by the same command once the app is connected to Neon._
 
 ---
 
