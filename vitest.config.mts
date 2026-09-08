@@ -15,6 +15,9 @@ export default defineConfig({
     // Loads .env.local for the RLS integration test. The unit tests need
     // nothing from it and pass on a clean clone.
     setupFiles: ['tests/setup.ts'],
+    // Signing up two throwaway users against a live Neon project takes a few
+    // network round trips; the default 10s hook timeout is too tight.
+    hookTimeout: 60_000,
     testTimeout: 30_000,
   },
 });

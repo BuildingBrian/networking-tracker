@@ -17,7 +17,30 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const AUTH_URL = process.env.NEXT_PUBLIC_NEON_AUTH_URL;
 const DATA_API_URL = process.env.NEXT_PUBLIC_NEON_DATA_API_URL;
 
-const configured = Boolean(AUTH_URL && DATA_API_URL);
+/**
+ * `.env.example` (and the .env.local generated from it) ships placeholder URLs
+ * so the app boots before Neon exists. Those are syntactically valid but point
+ * at nothing, so a plain non-empty check would let this suite run and hang on a
+ * host that never answers. Require a real-looking Neon endpoint instead.
+ */
+function isRealNeonUrl(url: string | undefined): boolean {
+  if (!url) return false;
+  if (url.includes('placeholder') || url.includes('your-project')) return false;
+  try {
+    return new URL(url).protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+const configured = isRealNeonUrl(AUTH_URL) && isRealNeonUrl(DATA_API_URL);
+
+if (!configured) {
+  console.info(
+    '\n  ℹ RLS integration tests skipped: no Neon project configured in .env.local.' +
+      '\n    The validation suite still runs. See the README to enable these.\n',
+  );
+}
 
 // A fresh pair of throwaway accounts per run, so repeated runs never collide.
 const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
