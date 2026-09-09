@@ -101,6 +101,8 @@ async function main() {
 
   const browser = await chromium.launch({ channel: 'chrome' });
   const context = await browser.newContext({ viewport: DESKTOP });
+  // A freshly started dev server compiles routes on first hit; give it room.
+  context.setDefaultNavigationTimeout(90_000);
   const page = await context.newPage();
 
   console.log(`Capturing against ${BASE_URL}`);
@@ -173,6 +175,7 @@ async function main() {
     viewport: MOBILE,
     storageState: await context.storageState(),
   });
+  mobile.setDefaultNavigationTimeout(90_000);
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${BASE_URL}/contacts`, { waitUntil: 'networkidle' });
   await waitForList(mobilePage, '4 contacts');

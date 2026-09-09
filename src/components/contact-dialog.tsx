@@ -34,6 +34,9 @@ type Draft = {
   priority: Priority;
 };
 
+/** Labels the priority <Select> trigger displays; Base UI otherwise shows the raw value. */
+const PRIORITY_LABELS: Record<Priority, string> = { high: 'High', medium: 'Medium', low: 'Low' };
+
 const EMPTY: Draft = {
   name: '',
   company: '',
@@ -171,6 +174,7 @@ export function ContactDialog({
             <Field label="Priority" htmlFor="priority" error={fieldErrors.priority} required>
               <Select
                 value={draft.priority}
+                items={PRIORITY_LABELS}
                 onValueChange={(value) => set('priority', value as Priority)}
               >
                 <SelectTrigger id="priority" className="w-full">

@@ -64,6 +64,14 @@ const PRIORITY_STYLES: Record<Priority, string> = {
   low: 'border-transparent bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200',
 };
 
+/** Labels the <Select> triggers display; Base UI otherwise shows the raw value. */
+const PRIORITY_FILTER_LABELS: Record<'all' | Priority, string> = {
+  all: 'All priorities',
+  high: 'High',
+  medium: 'Medium',
+  low: 'Low',
+};
+
 const SORT_LABELS: Record<SortField, string> = {
   created_at: 'Date added',
   name: 'Name',
@@ -217,6 +225,7 @@ export function ContactsApp({
 
           <Select
             value={priorityFilter}
+            items={PRIORITY_FILTER_LABELS}
             onValueChange={(value) => {
               setPriorityFilter(value as 'all' | Priority);
               startLoading();
@@ -235,6 +244,7 @@ export function ContactsApp({
 
           <Select
             value={sort}
+            items={SORT_LABELS}
             onValueChange={(value) => {
               setSort(value as SortField);
               startLoading();
