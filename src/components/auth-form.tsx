@@ -105,7 +105,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Brian Arevalo Ramos"
                 />
               </div>
             ) : null}
