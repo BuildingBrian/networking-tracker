@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "db:push": "node scripts/apply-schema.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
@@ -29,14 +30,17 @@
     "zod": "^4.5.4"
   },
   "devDependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitest/coverage-v8": "^4.1.11",
     "dotenv": "^17.4.2",
     "eslint": "^9",
     "eslint-config-next": "16.3.4",
+    "pg": "^8.23.0",
     "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5",

@@ -74,16 +74,19 @@ async function shot(page, name) {
 
 async function fillContact(page, contact) {
   await page.getByRole('button', { name: 'Add contact' }).first().click();
-  await page.getByLabel('Name').fill(contact.name);
-  await page.getByLabel('Company').fill(contact.company);
-  await page.getByLabel('Role', { exact: true }).fill(contact.role);
-  await page.getByLabel('Where you met').fill(contact.where_met);
-  if (contact.notes) await page.getByLabel('Notes').fill(contact.notes);
 
-  await page.getByLabel('Priority').click();
+  // Scope to the dialog: the list behind it has its own "Priority" filter.
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Name').fill(contact.name);
+  await dialog.getByLabel('Company').fill(contact.company);
+  await dialog.getByLabel('Role', { exact: true }).fill(contact.role);
+  await dialog.getByLabel('Where you met').fill(contact.where_met);
+  if (contact.notes) await dialog.getByLabel('Notes').fill(contact.notes);
+
+  await dialog.getByLabel('Priority').click();
   await page.getByRole('option', { name: contact.priority }).click();
 
-  await page.getByRole('button', { name: 'Add contact' }).last().click();
+  await dialog.getByRole('button', { name: 'Add contact' }).click();
   await page.waitForTimeout(700);
 }
 
@@ -129,8 +132,8 @@ async function main() {
 
   // Invalid input failing safely: blank name, rejected by the server.
   await page.getByRole('button', { name: 'Add contact' }).first().click();
-  await page.getByLabel('Company').fill('No Name Corp');
-  await page.getByRole('button', { name: 'Add contact' }).last().click();
+  await page.getByRole('dialog').getByLabel('Company').fill('No Name Corp');
+  await page.getByRole('dialog').getByRole('button', { name: 'Add contact' }).click();
   await page.waitForTimeout(900);
   await shot(page, '05-invalid-input-rejected');
   await page.getByRole('button', { name: 'Cancel' }).click();
@@ -148,7 +151,7 @@ async function main() {
 
   // Editing.
   await page.getByRole('button', { name: 'Edit' }).first().click();
-  await page.getByLabel('Notes').fill('Updated: coffee chat booked for next Tuesday.');
+  await page.getByRole('dialog').getByLabel('Notes').fill('Updated: coffee chat booked for next Tuesday.');
   await shot(page, '07-edit-contact');
   await page.getByRole('button', { name: 'Save changes' }).click();
   await page.waitForTimeout(900);

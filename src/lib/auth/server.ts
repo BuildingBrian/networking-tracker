@@ -78,20 +78,20 @@ export function authMiddleware(config?: { loginUrl?: string }) {
  * the token, so fall back to a cache-bypassing call when it is not present.
  */
 export async function getDataApiToken(): Promise<string> {
-  const cached = await getAuth().getSession();
-  const cachedToken = cached.data?.session?.token;
-  if (cachedToken) return cachedToken;
-
-  const fresh = await getAuth().getSession({ query: { disableCookieCache: 'true' } });
-  if (fresh.error) {
-    throw new Error(`Could not read the current session: ${fresh.error.message}`);
+  // The session cookie holds an opaque 32-character session token, which the
+  // Data API rejects ("not a valid JWT encoding"). The `token` endpoint
+  // exchanges the current session for a signed JWT whose subject claim is what
+  // Postgres reads via auth.user_id().
+  const { data, error } = await getAuth().token();
+  if (error) {
+    throw new Error(`Could not obtain a Neon Auth JWT: ${error.message}`);
   }
 
-  const token = fresh.data?.session?.token;
-  if (!token) {
-    throw new Error('No Neon Auth session token available for the current request.');
+  const jwt = (data as { token?: string } | null | undefined)?.token;
+  if (!jwt) {
+    throw new Error('Neon Auth returned no JWT for the current session.');
   }
-  return token;
+  return jwt;
 }
 
 export type SessionUser = {

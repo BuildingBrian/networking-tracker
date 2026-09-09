@@ -49,11 +49,13 @@ export async function GET(request: Request) {
     const { data, error } = await query.order(SORT_FIELDS[sort], { ascending });
 
     if (error) {
+      console.error('[contacts] data api:', error);
       return NextResponse.json({ error: 'Could not load your contacts.' }, { status: 500 });
     }
 
     return NextResponse.json({ contacts: data ?? [] });
-  } catch {
+  } catch (error) {
+    console.error('[contacts]', error);
     return NextResponse.json({ error: 'Could not load your contacts.' }, { status: 500 });
   }
 }
@@ -94,11 +96,13 @@ export async function POST(request: Request) {
       .single();
 
     if (error) {
+      console.error('[contacts] data api:', error);
       return NextResponse.json({ error: 'Could not save that contact.' }, { status: 500 });
     }
 
     return NextResponse.json({ contact: data }, { status: 201 });
-  } catch {
+  } catch (error) {
+    console.error('[contacts]', error);
     return NextResponse.json({ error: 'Could not save that contact.' }, { status: 500 });
   }
 }

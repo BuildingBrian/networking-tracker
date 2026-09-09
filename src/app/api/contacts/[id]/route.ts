@@ -59,6 +59,7 @@ export async function PATCH(request: Request, { params }: Params) {
       .select();
 
     if (error) {
+      console.error('[contacts] data api:', error);
       return NextResponse.json({ error: 'Could not update that contact.' }, { status: 500 });
     }
 
@@ -67,7 +68,8 @@ export async function PATCH(request: Request, { params }: Params) {
     }
 
     return NextResponse.json({ contact: data[0] });
-  } catch {
+  } catch (error) {
+    console.error('[contacts]', error);
     return NextResponse.json({ error: 'Could not update that contact.' }, { status: 500 });
   }
 }
@@ -92,6 +94,7 @@ export async function DELETE(_request: Request, { params }: Params) {
       .select();
 
     if (error) {
+      console.error('[contacts] data api:', error);
       return NextResponse.json({ error: 'Could not delete that contact.' }, { status: 500 });
     }
 
@@ -100,7 +103,8 @@ export async function DELETE(_request: Request, { params }: Params) {
     }
 
     return NextResponse.json({ ok: true });
-  } catch {
+  } catch (error) {
+    console.error('[contacts]', error);
     return NextResponse.json({ error: 'Could not delete that contact.' }, { status: 500 });
   }
 }

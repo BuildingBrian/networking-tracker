@@ -35,10 +35,22 @@ function isRealNeonUrl(url: string | undefined): boolean {
 
 const configured = isRealNeonUrl(AUTH_URL) && isRealNeonUrl(DATA_API_URL);
 
-if (!configured) {
+/**
+ * The running app, used only to mint each test user's JWT. Neon Auth issues
+ * JWTs to a signed session cookie, and this app's /api/auth proxy is what
+ * signs those cookies — so the cleanest way to get a browser-equivalent JWT
+ * from Node is to sign up through the app exactly as a browser would.
+ */
+const APP_URL = process.env.TEST_APP_URL ?? 'http://localhost:3000';
+
+const appReachable = configured
+  ? await fetch(`${APP_URL}/auth/sign-in`).then((r) => r.ok).catch(() => false)
+  : false;
+
+if (configured && !appReachable) {
   console.info(
-    '\n  ℹ RLS integration tests skipped: no Neon project configured in .env.local.' +
-      '\n    The validation suite still runs. See the README to enable these.\n',
+    `\n  ℹ RLS integration tests skipped: nothing is listening at ${APP_URL}.` +
+      '\n    Start the app with `npm run dev` (or set TEST_APP_URL) and re-run.\n',
   );
 }
 
@@ -57,28 +69,60 @@ const USER_B = {
 
 type Client = ReturnType<typeof createClient>;
 
+/**
+ * Signs a user up (or in, on a re-run) through the app and returns a Data API
+ * client bound to that user's JWT.
+ *
+ * Only the *token acquisition* touches the app. Every assertion below then
+ * goes straight to the public Data API URL with that JWT, bypassing the app's
+ * route handlers entirely — so nothing in application code can be what makes
+ * these tests pass. The only thing distinguishing User A from User B on the
+ * wire is the JWT, and the only thing enforcing separation is Postgres
+ * evaluating auth.user_id() against it.
+ */
 async function signedInClient(user: typeof USER_A): Promise<Client> {
-  const client = createClient({
-    auth: { url: AUTH_URL! },
-    dataApi: { url: DATA_API_URL! },
-  });
+  const jar = new Map<string, string>();
+  const cookieHeader = () => [...jar].map(([k, v]) => `${k}=${v}`).join('; ');
+  const absorb = (res: Response) => {
+    for (const cookie of res.headers.getSetCookie()) {
+      const [pair] = cookie.split(';');
+      const eq = pair.indexOf('=');
+      jar.set(pair.slice(0, eq), pair.slice(eq + 1));
+    }
+  };
+  const json = { 'Content-Type': 'application/json' };
 
-  const signUp = await client.auth.signUp.email(user);
-  if (signUp?.error) {
+  let res = await fetch(`${APP_URL}/api/auth/sign-up/email`, {
+    method: 'POST',
+    headers: json,
+    body: JSON.stringify(user),
+  });
+  if (!res.ok) {
     // Re-running against an existing account is fine; fall through to sign-in.
-    const signIn = await client.auth.signIn.email({
-      email: user.email,
-      password: user.password,
+    res = await fetch(`${APP_URL}/api/auth/sign-in/email`, {
+      method: 'POST',
+      headers: json,
+      body: JSON.stringify({ email: user.email, password: user.password }),
     });
-    if (signIn?.error) {
-      throw new Error(`Could not authenticate ${user.email}: ${signIn.error.message}`);
+    if (!res.ok) {
+      throw new Error(`Could not authenticate ${user.email}: HTTP ${res.status}`);
     }
   }
+  absorb(res);
 
-  return client;
+  // Exchange the session cookie for the JWT the Data API actually accepts.
+  const tokenRes = await fetch(`${APP_URL}/api/auth/token`, {
+    headers: { Cookie: cookieHeader() },
+  });
+  const { token } = (await tokenRes.json().catch(() => ({}))) as { token?: string };
+  if (!token) throw new Error(`Neon Auth returned no JWT for ${user.email}.`);
+
+  return createClient({
+    dataApi: { url: DATA_API_URL!, getToken: async () => token },
+  }) as Client;
 }
 
-describe.skipIf(!configured)('RLS: one user cannot reach another user\'s contacts', () => {
+describe.skipIf(!configured || !appReachable)('RLS: one user cannot reach another user\'s contacts', () => {
   let clientA: Client;
   let clientB: Client;
   let contactIdA: string;
