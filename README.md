@@ -2,7 +2,7 @@
 
 A private, per-user networking tracker for the people you want to stay connected with at Berkeley. Sign up, add the people you meet — name, company, role, where you met, notes, and a priority — then sort, filter, edit, and delete them. Every contact belongs to exactly one account, and that ownership is enforced by **Row Level Security inside Postgres** rather than by application code, so the data stays private even against a request made directly to the public Data API with a valid login.
 
-**Live app:** **https://networking-tracker-gules.vercel.app** (alias: https://networking-tracker-building-brian.vercel.app)
+**Live app:** **https://networking-tracker-gules.vercel.app**
 
 **Repository:** https://github.com/BuildingBrian/networking-tracker
 
@@ -337,7 +337,7 @@ Because the suite talks to the public endpoint with each user's own token, nothi
 | Two-account test: User A cannot access User B's contacts | The seven `tests/rls.test.ts` results in [Test output](#test-output), run against the public Data API with two real accounts |
 | Invalid input failing safely | [`docs/05-invalid-input-rejected.png`](docs/05-invalid-input-rejected.png) — server `400`, inline + toast message |
 | Schema and RLS ownership rule | [Database schema](#database-schema), [Authentication and RLS ownership](#authentication-and-rls-ownership), [`db/schema.sql`](db/schema.sql) |
-| No committed secrets | `.env.local` is git-ignored; `.env.example` holds placeholders only. Verify: `git log -p \| grep -E 'postgresql://\|npg_'` returns nothing. |
+| No committed secrets | `.env.local` is git-ignored and appears in no commit; `.env.example` holds placeholders only. Verified over the full history: `git log -p --all \| grep -cE 'npg_[A-Za-z0-9]{6,}'` (Neon passwords carry an `npg_` prefix), a search for the pooled database host, and a search for the cookie secret all return `0`. The only `postgresql://` in the repo is the placeholder in `.env.example`. |
 | Mobile-friendly UI | [`docs/09-mobile-contact-list.png`](docs/09-mobile-contact-list.png) |
 | Two-account test **repeated in production** | [Production verification](#production-verification) — 7/7 RLS tests against the live URL, output in [`docs/production-test-output.txt`](docs/production-test-output.txt) |
 | Definition-of-Done checks **run against the live URL** | 16/16 in [`docs/production-verify-output.txt`](docs/production-verify-output.txt); full screenshot lifecycle in [`docs/production/`](docs/production/) |
@@ -416,7 +416,7 @@ Verifying https://networking-tracker-gules.vercel.app
    ```bash
    neon neon-auth domain add https://<your-app>.vercel.app --project-id <id> --branch production
    ```
-   For this deployment both production aliases are registered: `networking-tracker-gules.vercel.app` and `networking-tracker-building-brian.vercel.app`.
+   For this deployment the public production domain `networking-tracker-gules.vercel.app` is registered. Vercel also generates a `<project>-<team>.vercel.app` alias, but Deployment Protection puts a Vercel login in front of it — so that one is deliberately *not* the URL in this README.
 6. Open the public URL in a private window, create two accounts, and confirm neither can see the other's contacts. The same can be automated: `TEST_APP_URL=https://<your-app>.vercel.app npm test`.
 
 ---
