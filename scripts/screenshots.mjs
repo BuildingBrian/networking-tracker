@@ -72,6 +72,12 @@ async function shot(page, name) {
   console.log(`  ✓ ${file}`);
 }
 
+/** Waits until the contact list has actually rendered (not the loading skeleton). */
+async function waitForList(page, expectedText) {
+  await page.getByText(expectedText, { exact: true }).waitFor({ timeout: 15_000 });
+  await page.waitForTimeout(300);
+}
+
 async function fillContact(page, contact) {
   await page.getByRole('button', { name: 'Add contact' }).first().click();
 
@@ -123,18 +129,18 @@ async function main() {
     return;
   }
 
-  await page.waitForTimeout(900);
+  await waitForList(page, 'No contacts yet');
   await shot(page, '03-empty-state');
 
   for (const contact of CONTACTS) await fillContact(page, contact);
-  await page.waitForTimeout(700);
+  await waitForList(page, '4 contacts');
   await shot(page, '04-contact-list');
 
   // Invalid input failing safely: blank name, rejected by the server.
   await page.getByRole('button', { name: 'Add contact' }).first().click();
   await page.getByRole('dialog').getByLabel('Company').fill('No Name Corp');
   await page.getByRole('dialog').getByRole('button', { name: 'Add contact' }).click();
-  await page.waitForTimeout(900);
+  await page.getByRole('dialog').getByText('Name is required.').waitFor();
   await shot(page, '05-invalid-input-rejected');
   await page.getByRole('button', { name: 'Cancel' }).click();
   await page.waitForTimeout(400);
@@ -142,23 +148,24 @@ async function main() {
   // Sorting and filtering.
   await page.getByLabel('Filter by priority').click();
   await page.getByRole('option', { name: 'High' }).click();
-  await page.waitForTimeout(800);
+  await waitForList(page, '2 contacts');
   await shot(page, '06-filtered-high-priority');
 
   await page.getByLabel('Filter by priority').click();
   await page.getByRole('option', { name: 'All priorities' }).click();
-  await page.waitForTimeout(800);
+  await waitForList(page, '4 contacts');
 
   // Editing.
   await page.getByRole('button', { name: 'Edit' }).first().click();
   await page.getByRole('dialog').getByLabel('Notes').fill('Updated: coffee chat booked for next Tuesday.');
   await shot(page, '07-edit-contact');
   await page.getByRole('button', { name: 'Save changes' }).click();
-  await page.waitForTimeout(900);
+  await page.getByRole('dialog').waitFor({ state: 'hidden' });
+  await waitForList(page, '4 contacts');
 
   // Survives a refresh, because it lives in Postgres.
   await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(900);
+  await waitForList(page, '4 contacts');
   await shot(page, '08-persists-after-refresh');
 
   // Mobile.
@@ -168,9 +175,21 @@ async function main() {
   });
   const mobilePage = await mobile.newPage();
   await mobilePage.goto(`${BASE_URL}/contacts`, { waitUntil: 'networkidle' });
-  await mobilePage.waitForTimeout(1200);
+  await waitForList(mobilePage, '4 contacts');
   await shot(mobilePage, '09-mobile-contact-list');
   await mobile.close();
+
+  // Deleting. The app confirms with window.confirm; accept it.
+  page.once('dialog', (dialog) => dialog.accept());
+  await page.getByRole('button', { name: 'Delete' }).first().click();
+  await waitForList(page, '3 contacts');
+  await shot(page, '10-after-delete');
+
+  // Sign out lands back on the sign-in screen.
+  await page.getByRole('button', { name: 'Sign out' }).click();
+  await page.waitForURL('**/auth/sign-in', { timeout: 15_000 });
+  await page.waitForTimeout(400);
+  await shot(page, '11-signed-out');
 
   await browser.close();
   console.log(`\nDone — ${shots.length} screenshots in ${OUT}/`);

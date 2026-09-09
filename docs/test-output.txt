@@ -1,0 +1,30 @@
+ RUN  v4.1.11 /Users/brianarevaloramos/Desktop/Claude AI /Projects/networking-tracker
+ ✓ tests/validation.test.ts > contact validation — name > rejects an empty name with a clear message 5ms
+ ✓ tests/validation.test.ts > contact validation — name > rejects a name that is only whitespace 0ms
+ ✓ tests/validation.test.ts > contact validation — name > rejects a missing name 0ms
+ ✓ tests/validation.test.ts > contact validation — name > rejects a name longer than 200 characters 0ms
+ ✓ tests/validation.test.ts > contact validation — name > trims surrounding whitespace from an otherwise valid name 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > accepts the valid priority "high" 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > accepts the valid priority "medium" 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > accepts the valid priority "low" 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > rejects a priority outside high / medium / low 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > rejects a priority in the wrong case 0ms
+ ✓ tests/validation.test.ts > contact validation — priority > rejects a missing priority 0ms
+ ✓ tests/validation.test.ts > contact validation — optional fields > accepts a contact with only a name and a priority 0ms
+ ✓ tests/validation.test.ts > contact validation — optional fields > normalises blank optional fields to null rather than empty strings 0ms
+ ✓ tests/validation.test.ts > contact validation — updates > accepts a partial update of a single field 1ms
+ ✓ tests/validation.test.ts > contact validation — updates > still rejects an explicitly empty name on update 0ms
+ ✓ tests/validation.test.ts > contact validation — updates > still rejects an invalid priority on update 0ms
+ ✓ tests/validation.test.ts > contact validation — updates > rejects an empty update payload 0ms
+ ✓ tests/validation.test.ts > validate() error shape > returns a human-readable top-level message the API can pass straight through 1ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A can read their own contact 1240ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot SELECT User A's contact, even by its exact ID 381ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B does not see User A's contact in an unfiltered list 523ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot UPDATE User A's contact 893ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot DELETE User A's contact 752ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot INSERT a row owned by User A 777ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A cannot hand their own row to User B via UPDATE 1931ms
+ Test Files  2 passed (2)
+      Tests  25 passed (25)
+   Start at  21:27:53
+   Duration  56.24s (transform 96ms, setup 66ms, import 598ms, tests 55.52s, environment 0ms)
