@@ -2,7 +2,7 @@
 
 A private, per-user networking tracker for the people you want to stay connected with at Berkeley. Sign up, add the people you meet — name, company, role, where you met, notes, and a priority — then sort, filter, edit, and delete them. Every contact belongs to exactly one account, and that ownership is enforced by **Row Level Security inside Postgres** rather than by application code, so the data stays private even against a request made directly to the public Data API with a valid login.
 
-**Live app:** <!-- LIVE_URL -->_(deploying — see [Deployment](#deployment))_
+**Live app:** **https://networking-tracker-gules.vercel.app** (alias: https://networking-tracker-building-brian.vercel.app)
 
 **Repository:** https://github.com/BuildingBrian/networking-tracker
 
@@ -355,6 +355,7 @@ Because the suite talks to the public endpoint with each user's own token, nothi
    ```bash
    neon neon-auth domain add https://<your-app>.vercel.app --project-id <id> --branch production
    ```
+   For this deployment both production aliases are registered: `networking-tracker-gules.vercel.app` and `networking-tracker-building-brian.vercel.app`.
 6. Open the public URL in a private window, create two accounts, and confirm neither can see the other's contacts. The same can be automated: `TEST_APP_URL=https://<your-app>.vercel.app npm test`.
 
 ---
