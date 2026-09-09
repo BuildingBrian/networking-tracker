@@ -171,6 +171,7 @@ Other commands:
 
 ```bash
 npm test               # automated tests (see Tests)
+npm run verify         # 16-step black-box check of a running instance (BASE_URL=… for production)
 npm run screenshots    # regenerate docs/*.png against a running instance
 npm run build          # production build
 npm run lint
@@ -286,6 +287,8 @@ Two suites, 25 tests.
 
 Because the suite talks to the public endpoint with each user's own token, nothing in the application's code can be what makes it pass. Only RLS can.
 
+**3. `npm run verify` — a 16-step black-box check through the public HTTP surface** (`scripts/verify-production.mjs`). Point it at any running instance with `BASE_URL`. It creates one throwaway account and confirms: unauthenticated requests get `401` and the redirect to sign-in; blank name + invalid priority fail with per-field errors; create returns `201` with `user_id` stamped by the database; edit applies; an attempt to reassign `user_id` is ignored and the row stays owned by the caller; the priority filter works; delete returns `200` then `404`; and after sign-out the API refuses the request again. Exits non-zero on any failure, so it doubles as a post-deploy gate.
+
 ### Test output
 
 `npm test` on 2026-09-08 against the live Neon project (`FORCE_COLOR=0 npx vitest run --reporter=verbose`, saved as [`docs/test-output.txt`](docs/test-output.txt)):
@@ -344,10 +347,16 @@ Because the suite talks to the public endpoint with each user's own token, nothi
 2. `vercel login`, then from the repo root `vercel link` (or import the repo in the Vercel dashboard).
 3. Add the production environment variables — **Vercel → Settings → Environment Variables**, or:
    ```bash
-   vercel env add NEXT_PUBLIC_NEON_AUTH_URL production
-   vercel env add NEXT_PUBLIC_NEON_DATA_API_URL production
-   vercel env add NEON_AUTH_BASE_URL production
-   vercel env add NEON_AUTH_COOKIE_SECRET production
+   # The CLI refuses NEXT_PUBLIC_* values that look like credentials unless you
+   # declare them public explicitly. These two are public by design — RLS, not
+   # URL secrecy, protects the data.
+   vercel env add NEXT_PUBLIC_NEON_AUTH_URL     production --type config --value "https://…/neondb/auth"
+   vercel env add NEXT_PUBLIC_NEON_DATA_API_URL production --type config --value "https://…/neondb/rest/v1"
+
+   # Server-only values: pipe them in so they never appear on a command line,
+   # in shell history, or in `ps` output.
+   printf '%s' "$NEON_AUTH_BASE_URL"      | vercel env add NEON_AUTH_BASE_URL      production --sensitive
+   printf '%s' "$NEON_AUTH_COOKIE_SECRET" | vercel env add NEON_AUTH_COOKIE_SECRET production --sensitive
    ```
    `DATABASE_URL` is deliberately **not** added — the running app never uses it.
 4. `vercel --prod`.

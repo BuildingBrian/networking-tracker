@@ -11,7 +11,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "screenshots": "node scripts/screenshots.mjs",
-    "db:push": "node scripts/apply-schema.mjs"
+    "db:push": "node scripts/apply-schema.mjs",
+    "verify": "node scripts/verify-production.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",

@@ -2,6 +2,7 @@
  * Captures the README's product screenshots against a running instance.
  *
  *   BASE_URL=http://localhost:3000 node scripts/screenshots.mjs
+ *   BASE_URL=https://<app>.vercel.app OUT_DIR=docs/production node scripts/screenshots.mjs
  *
  * Uses the locally installed Google Chrome (channel: 'chrome') rather than a
  * downloaded Chromium build, so it needs no extra browser download.
@@ -16,7 +17,9 @@ import { mkdir } from 'node:fs/promises';
 import { chromium } from 'playwright';
 
 const BASE_URL = process.env.BASE_URL ?? 'http://localhost:3000';
-const OUT = 'docs';
+// Override to capture a second set (e.g. against production) without
+// overwriting the local ones:  OUT_DIR=docs/production
+const OUT = process.env.OUT_DIR ?? 'docs';
 
 const stamp = Date.now();
 const USER = {
