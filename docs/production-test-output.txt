@@ -1,0 +1,12 @@
+ RUN  v4.1.11 /Users/brianarevaloramos/Desktop/Claude AI /Projects/networking-tracker
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A can read their own contact 1354ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot SELECT User A's contact, even by its exact ID 374ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B does not see User A's contact in an unfiltered list 380ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot UPDATE User A's contact 749ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot DELETE User A's contact 740ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot INSERT a row owned by User A 761ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A cannot hand their own row to User B via UPDATE 1884ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  22:34:05
+   Duration  64.18s (transform 47ms, setup 39ms, import 52.57s, tests 11.21s, environment 0ms)

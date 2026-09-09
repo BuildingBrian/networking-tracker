@@ -1,0 +1,20 @@
+Verifying https://networking-tracker-gules.vercel.app
+
+✓ sign-in page renders  (HTTP 200)
+✓ GET /api/contacts without a session → 401  (HTTP 401)
+✓ /contacts without a session redirects to sign-in  (HTTP 307 → /auth/sign-in)
+✓ sign-up succeeds and sets a session cookie  (HTTP 200, cookies: 2)
+✓ new account starts with an empty list  (HTTP 200, 0 contacts)
+✓ blank name + invalid priority → 400 with per-field errors  (HTTP 400: Name is required.)
+✓ create → 201 with user_id stamped by the database  (HTTP 201, id f499ce1d-7168-4c3e-a1bc-549f603c6e2c)
+✓ created contact appears in the list  (1 contacts)
+✓ edit → 200 and the change is applied  (HTTP 200)
+✓ attempt to reassign user_id is ignored; row stays owned by caller  (user_id unchanged)
+✓ priority filter works (low → 1, high → 0)  (low 1, high 0)
+✓ delete → 200  (HTTP 200)
+✓ deleting it again → 404  (HTTP 404)
+✓ list is empty again  (0 contacts)
+✓ sign-out → 200  (HTTP 200)
+✓ API refuses the request after sign-out → 401  (HTTP 401)
+
+16 passed, 0 failed

@@ -21,6 +21,7 @@ A private, per-user networking tracker for the people you want to stay connected
 - [Authentication and RLS ownership](#authentication-and-rls-ownership)
 - [Tests](#tests)
 - [Grading evidence](#grading-evidence)
+- [Production verification](#production-verification)
 - [Deployment](#deployment)
 - [Known limitations and what I'd improve next](#known-limitations-and-what-id-improve-next)
 
@@ -338,6 +339,57 @@ Because the suite talks to the public endpoint with each user's own token, nothi
 | Schema and RLS ownership rule | [Database schema](#database-schema), [Authentication and RLS ownership](#authentication-and-rls-ownership), [`db/schema.sql`](db/schema.sql) |
 | No committed secrets | `.env.local` is git-ignored; `.env.example` holds placeholders only. Verify: `git log -p \| grep -E 'postgresql://\|npg_'` returns nothing. |
 | Mobile-friendly UI | [`docs/09-mobile-contact-list.png`](docs/09-mobile-contact-list.png) |
+| Two-account test **repeated in production** | [Production verification](#production-verification) — 7/7 RLS tests against the live URL, output in [`docs/production-test-output.txt`](docs/production-test-output.txt) |
+| Definition-of-Done checks **run against the live URL** | 16/16 in [`docs/production-verify-output.txt`](docs/production-verify-output.txt); full screenshot lifecycle in [`docs/production/`](docs/production/) |
+
+---
+
+## Production verification
+
+Everything above was re-run against the deployed app, not just locally. Deployment `dpl_…ado1a7ss5` (built 2026-09-08 22:31 PDT from stored Vercel environment variables, nothing passed inline) is what `https://networking-tracker-gules.vercel.app` serves.
+
+**Black-box lifecycle — `BASE_URL=https://networking-tracker-gules.vercel.app npm run verify`:**
+
+```
+Verifying https://networking-tracker-gules.vercel.app
+
+✓ sign-in page renders  (HTTP 200)
+✓ GET /api/contacts without a session → 401  (HTTP 401)
+✓ /contacts without a session redirects to sign-in  (HTTP 307 → /auth/sign-in)
+✓ sign-up succeeds and sets a session cookie  (HTTP 200, cookies: 2)
+✓ new account starts with an empty list  (HTTP 200, 0 contacts)
+✓ blank name + invalid priority → 400 with per-field errors  (HTTP 400: Name is required.)
+✓ create → 201 with user_id stamped by the database  (HTTP 201, id f499ce1d-7168-4c3e-a1bc-549f603c6e2c)
+✓ created contact appears in the list  (1 contacts)
+✓ edit → 200 and the change is applied  (HTTP 200)
+✓ attempt to reassign user_id is ignored; row stays owned by caller  (user_id unchanged)
+✓ priority filter works (low → 1, high → 0)  (low 1, high 0)
+✓ delete → 200  (HTTP 200)
+✓ deleting it again → 404  (HTTP 404)
+✓ list is empty again  (0 contacts)
+✓ sign-out → 200  (HTTP 200)
+✓ API refuses the request after sign-out → 401  (HTTP 401)
+
+16 passed, 0 failed
+```
+
+**Two-account privacy test against production — `TEST_APP_URL=https://networking-tracker-gules.vercel.app npx vitest run tests/rls.test.ts`** (accounts created through the live app's auth proxy; every assertion sent straight to the public Data API with each user's JWT):
+
+```
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A can read their own contact 1354ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot SELECT User A's contact, even by its exact ID 374ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B does not see User A's contact in an unfiltered list 380ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot UPDATE User A's contact 749ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot DELETE User A's contact 740ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User B cannot INSERT a row owned by User A 761ms
+ ✓ tests/rls.test.ts > RLS: one user cannot reach another user's contacts > User A cannot hand their own row to User B via UPDATE 1884ms
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+```
+
+**Full screenshot lifecycle on production** — same script, `OUT_DIR=docs/production`: [sign-in](docs/production/01-sign-in.png) · [empty state](docs/production/03-empty-state.png) · [list](docs/production/04-contact-list.png) · [invalid input rejected](docs/production/05-invalid-input-rejected.png) · [filter](docs/production/06-filtered-high-priority.png) · [edit](docs/production/07-edit-contact.png) · [after refresh](docs/production/08-persists-after-refresh.png) · [mobile](docs/production/09-mobile-contact-list.png) · [after delete](docs/production/10-after-delete.png) · [signed out](docs/production/11-signed-out.png)
+
+![Production contact list](docs/production/04-contact-list.png)
 
 ---
 
