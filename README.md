@@ -1,3 +1,7 @@
+<div align="center">
+  <a href="https://github.com/BuildingBrian"><img src=".github/arcade/banner.svg" width="100%" alt="networking-tracker: Next.js and Postgres with Row Level Security. A BuildingBrian project."></a>
+</div>
+
 # Networking Tracker
 
 A private, per-user networking tracker for the people you want to stay connected with at Berkeley. Sign up, add the people you meet — name, company, role, where you met, notes, and a priority — then sort, filter, edit, and delete them. Every contact belongs to exactly one account, and that ownership is enforced by **Row Level Security inside Postgres** rather than by application code, so the data stays private even against a request made directly to the public Data API with a valid login.
@@ -431,3 +435,12 @@ Verifying https://networking-tracker-gules.vercel.app
 - **`@neondatabase/neon-js` is a beta SDK** (0.7.0-beta). Its `getAccessToken` helper 404s against Managed Better Auth today; this app calls the `token` endpoint directly, which is the documented JWT source, but the surface may shift between beta releases.
 - **No optimistic UI.** Every mutation refetches the list. Fine at this size.
 - **Tests cover validation and RLS, not the UI.** Playwright tests for sign-in → add → edit → delete would be the highest-value addition; the screenshot script is most of the way there.
+
+<p align="center">
+  <a href="https://github.com/BuildingBrian"><img src=".github/arcade/btn-stages.svg" alt="Back to stage select: github.com/BuildingBrian"></a>
+  <a href="https://buildingbrian.github.io/BuildingBrian/"><img src=".github/arcade/btn-play.svg" alt="Play Vapor Strike, the arcade game behind the profile"></a>
+</p>
+
+<div align="center">
+  <a href="https://github.com/BuildingBrian"><img src=".github/arcade/footer.svg" width="100%" alt="Thank you for playing. A BuildingBrian project."></a>
+</div>
